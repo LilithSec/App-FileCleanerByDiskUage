@@ -4,14 +4,14 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my %WriteMakefileArgs = (
-	NAME             => 'App::FileCleanerByDiskUage',
-	AUTHOR           => q{Zane C. Bowers-Hadley <vvelox@vvelox.net>},
-	VERSION_FROM     => 'lib/App/FileCleanerByDiskUage.pm',
-	ABSTRACT_FROM    => 'lib/App/FileCleanerByDiskUage.pm',
-	LICENSE          => 'lgpl_3_0',
-	MIN_PERL_VERSION => '5.006',
-	EXE_FILES        => ['src_bin/file_cleaner_by_du'],
-	INST_SCRIPT      => 'bin',
+	NAME               => 'App::FileCleanerByDiskUage',
+	AUTHOR             => q{Zane C. Bowers-Hadley <vvelox@vvelox.net>},
+	VERSION_FROM       => 'lib/App/FileCleanerByDiskUage.pm',
+	ABSTRACT_FROM      => 'lib/App/FileCleanerByDiskUage.pm',
+	LICENSE            => 'lgpl_3_0',
+	MIN_PERL_VERSION   => '5.006',
+	EXE_FILES          => ['src_bin/file_cleaner_by_du'],
+	INST_SCRIPT        => 'bin',
 	CONFIGURE_REQUIRES => {
 		'ExtUtils::MakeMaker' => '0',
 	},
@@ -19,7 +19,9 @@ my %WriteMakefileArgs = (
 		'Test::More' => '0',
 	},
 	PREREQ_PM => {
-		'Filesys::Df' => '0',
+		'Filesys::Df'      => '0',
+		'File::Find::Rule' => '0',
+		'JSON'             => '0',
 	},
 	dist       => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 	clean      => { FILES    => 'App-FileCleanerByDiskUage-*' },

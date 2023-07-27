@@ -9,3 +9,5 @@ t/pod-coverage.t
 t/pod.t
 bin/.exists
 src_bin/file_cleaner_by_du
+.perlcriticrc
+.perltidyrc
