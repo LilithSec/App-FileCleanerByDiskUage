@@ -4,7 +4,7 @@ Removes old files based on total amount of disk used till disk usage drops below
 
 # SYNOPSIS
 
-file_cleaner_by_du -p <path> -d <du> [-m <min_files>] [--pretty] [--dry_run]
+file_cleaner_by_du -p $path -d $du [-m $min_files] [--pretty] [--dry_run]
 
 # DESCRIPTION
 
