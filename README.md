@@ -30,7 +30,7 @@ with the newest.
 8: Go back to 6.
 
 The results are then printed as JSON. To find information on the keys, please
-see L<App::FileCleanerByDiskUage>.
+see App::FileCleanerByDiskUage.
 
 If there were no errors, it will exit zero.
 
@@ -59,7 +59,7 @@ If there were no errors, it will exit zero.
 
 # INSTALLATION
 
-# cpanm
+## cpanm
 
 ```
 cpanm  App::FileCleanerByDiskUage
