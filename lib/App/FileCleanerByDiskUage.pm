@@ -6,48 +6,87 @@ use warnings;
 
 =head1 NAME
 
-App::FileCleanerByDiskUage - The great new App::FileCleanerByDiskUage!
+App::FileCleanerByDiskUage - 
 
 =head1 VERSION
 
-Version 0.01
+Version 0.0.1
 
 =cut
 
-our $VERSION = '0.01';
-
+our $VERSION = '0.0.1';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
     use App::FileCleanerByDiskUage;
 
-    my $foo = App::FileCleanerByDiskUage->new();
-    ...
+    my $removed=App::FileCleanerByDiskUage->clean(path=>'/var/log/suricata/pcap/', ignore=>'\.pcap$', du=>90);
 
-=head1 EXPORT
+=head1 Functions
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
+=head2 clean
 
 =cut
 
-sub function1 {
-}
+sub clean {
+	my ( $empty, %opts ) = @_;
 
-=head2 function2
+	if ( !defined( $opts{path} ) ) {
+		die('$opts{path} is not defined');
+	} elsif ( !-d $opts{path} ) {
+		die( '$opts{path} is set to "' . $opts{path} . '" which is not a directory or does not exist' );
+	}
 
-=cut
+	if ( !defined( $opts{du} ) ) {
+		die('$opts{du} is not defined');
+	} elsif ( $opts{du} !~ /^\d+$/ ) {
+		die( '$opts{du} is set to "' . $opts{du} . '" whish is not numeric' );
+	}
 
-sub function2 {
-}
+	my $results = { deleted => [], errors => [] };
+
+	my $df = df( $opts{path} );
+
+	if ( $df->{per} < $opts{du} ) {
+		return $results;
+	}
+
+	my @files;
+	if ( defined( $opts{ignore} ) ) {
+		my $ignore_rule = File::Find::Rule->new;
+		$ignore_rule->name(qr/$opts{ignore}/);
+		@files = File::Find::Rule->file()->not($ignore_rule)->in( $opts{path} );
+	} else {
+		@files = File::Find::Rule->file()->in( $opts{path} );
+	}
+
+	my @files_info;
+	foreach my $file (@files) {
+		my %file_info;
+		(
+			$file_info{dev},   $file_info{ino},     $file_info{mode}, $file_info{nlink}, $file_info{uid},
+			$file_info{gid},   $file_info{rdev},    $file_info{size}, $file_info{atime}, $file_info{mtime},
+			$file_info{ctime}, $file_info{blksize}, $file_info{blocks}
+		) = stat($file);
+		$file_info{name} = $file;
+		push( @files_info, \%file_info );
+	} ## end foreach my $file (@files)
+
+	@files_info = sort { $a->{mtime} cmp $b->{mtime} } @files_info;
+
+	my $int = 0;
+	while ( $df->{per} >= $opts{du} && defined( $files_info[$int] ) ) {
+		eval { unlink( $files_info[$int]{name} ) or die($!); };
+		if ($@) {
+			push( @{ $results->{errors} }, 'Failed to remove "' . $files_info[$int]{name} . '"... ' . $@ );
+		}
+
+		$int++;
+		$df = df( $opts{path} );
+	}
+
+	return $results;
+} ## end sub clean
 
 =head1 AUTHOR
 
@@ -102,4 +141,4 @@ This is free software, licensed under:
 
 =cut
 
-1; # End of App::FileCleanerByDiskUage
+1;    # End of App::FileCleanerByDiskUage
