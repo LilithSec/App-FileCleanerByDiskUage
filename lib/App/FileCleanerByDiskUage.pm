@@ -87,6 +87,8 @@ The following hash values are taken by it.
 
 The returned value is a hash ref.
 
+    - dry_run :: Boolean for fir it was a dry run or not.
+
     - found_files :: Array of hashes of data for all files found. This will only be defined if du is above
                      threshold for removing files. If it is below it, the function will return instead of taking
                      the time required to run a search.
@@ -95,11 +97,15 @@ The returned value is a hash ref.
 
     - unlinked :: Array of hashes of data for files that have been removed.
 
+    - unlinked_count :: A count of how many files were unlinked
+
     - unlink_errors :: Array of strings containing error descriptions.
 
     - unlink_failed :: Array of hashes of data for files that could not removed. The corresponding
                        index in .errors will be the error in question. So $results->{unlink_failed}[0]
                        would be $results->{unlink_errors}[0]
+
+    - unlink_fialed_count :: A count of how many files unlinking failed for.
 
 The files hash is composed as below.
 
