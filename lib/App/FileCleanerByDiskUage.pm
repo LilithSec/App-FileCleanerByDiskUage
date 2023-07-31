@@ -12,11 +12,11 @@ App::FileCleanerByDiskUage - Removes files based on disk space usage till it dro
 
 =head1 VERSION
 
-Version 0.0.1
+Version 0.1.0
 
 =cut
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.1.0';
 
 =head1 SYNOPSIS
 
@@ -69,7 +69,9 @@ The following hash values are taken by it.
 
     Minimum Required Vars: path, du
 
-    - path :: The path to look for files under.
+    - path :: The path to look for files under. May be a array of paths. Only the first is used
+              for getting the disk usage though, so this should not have paths in it that are on
+              a different partition.
         Default :: undef
 
     - du :: Disk usage to remove files down till.
@@ -94,6 +96,9 @@ The returned value is a hash ref.
                      the time required to run a search.
 
     - found_files_count :: A count of files found.
+
+    - path :: The value of path that it was called with. This will always be a array, regardless of if a array or
+              scalar was passed as internally converts a scalars into a array containing just a single item.
 
     - unlinked :: Array of hashes of data for files that have been removed.
 
@@ -131,10 +136,29 @@ The files hash is composed as below.
 sub clean {
 	my ( $empty, %opts ) = @_;
 
+	my $du_path;
 	if ( !defined( $opts{path} ) ) {
 		die('$opts{path} is not defined');
-	} elsif ( !-d $opts{path} ) {
+	} elsif ( ref( $opts{path} ) ne 'ARRAY' && !-d $opts{path} ) {
 		die( '$opts{path} is set to "' . $opts{path} . '" which is not a directory or does not exist' );
+	} elsif ( ref( $opts{path} ) eq 'ARRAY' ) {
+		if ( !defined( $opts{path}[0] ) ) {
+			die('$opts{path}[0] is not defined');
+		}
+		my $int = 0;
+		while ( defined( $opts{path}[$int] ) ) {
+			if ( !-d $opts{path}[$int] ) {
+				die(      '$opts{path}['
+						. $int
+						. '] is set to "'
+						. $opts{path}[$int]
+						. '" which is not a directory or does not exist' );
+			}
+			$int++;
+		} ## end while ( defined( $opts{path}[$int] ) )
+		$du_path = $opts{path}[0];
+	} else {
+		$du_path = $opts{path} = [ $opts{path} ];
 	}
 
 	if ( !defined( $opts{du} ) ) {
@@ -154,7 +178,7 @@ sub clean {
 		$opts{dry_run} = 1,;
 	}
 
-	my $df = df( $opts{path} );
+	my $df = df($du_path);
 
 	# the results to be returned
 	my $results = {
@@ -170,6 +194,7 @@ sub clean {
 		du_ending           => $df->{per},
 		min_files           => 0,
 		dry_run             => $opts{dry_run},
+		path                => $opts{path},
 	};
 
 	if ( $df->{per} < $opts{du} ) {
@@ -180,9 +205,9 @@ sub clean {
 	if ( defined( $opts{ignore} ) ) {
 		my $ignore_rule = File::Find::Rule->new;
 		$ignore_rule->name(qr/$opts{ignore}/);
-		@files = File::Find::Rule->file()->not($ignore_rule)->in( $opts{path} );
+		@files = File::Find::Rule->file()->not($ignore_rule)->in( @{ $opts{path} } );
 	} else {
-		@files = File::Find::Rule->file()->in( $opts{path} );
+		@files = File::Find::Rule->file()->in( @{ $opts{path} } );
 	}
 	$results->{found_files_count} = $#files + 1;
 
@@ -242,7 +267,7 @@ sub clean {
 		}
 
 		$int++;
-		$df = df( $opts{path} );
+		$df = df($du_path);
 	} ## end while ( $df->{per} >= $opts{du} && defined( $files_info...))
 
 	$results->{du_ending} = $df->{per};

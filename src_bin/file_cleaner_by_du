@@ -46,6 +46,10 @@ Target disk usage.
 
 The path to operate on.
 
+This may be specified more than once. Only the first is used for getting usage, so it shoudld not cross partitions.
+
+Paths that are on different mount points run the risk of removing to much as it is never checking the proper partition.
+
 =head2 --dry_run
 
 Do not actually delete anything. Instead just check if what it would delete
@@ -80,20 +84,20 @@ use JSON;
 use App::FileCleanerByDiskUage;
 
 sub version {
-	print "file_cleaner_by_du v. 0.0.1\n";
+	print 'file_cleaner_by_du v. '.$App::FileCleanerByDiskUage::VERSION."\n";
 }
 
 my $help;
 my $version;
 my $du;
-my $path;
+my @path;
 my $ignore;
 my $min_files;
 my $pretty;
 my $dry_run;
 GetOptions(
 	'd=s'     => \$du,
-	'p=s'     => \$path,
+	'p=s'     => \@path,
 	'i=s'     => \$ignore,
 	'm=s'     => \$min_files,
 	'help'    => \$help,
@@ -118,7 +122,7 @@ if ($help) {
 
 -d <du>        Target disk usage.
 
--p <path>      The path to operate on.
+-p <path>      The path to operate on. This may be specified more than once. Only the first is used for getting usage, so it shoudld not cross partitions.
 
 -i <regex>     Optional ignore regex.
 
@@ -140,7 +144,7 @@ if ($help) {
 } ## end if ($help)
 
 my $results
-	= App::FileCleanerByDiskUage->clean( path => $path, du => $du, min_files => $min_files, dry_run => $dry_run );
+	= App::FileCleanerByDiskUage->clean( path => \@path, du => $du, min_files => $min_files, dry_run => $dry_run );
 
 if ( !$pretty ) {
 	print encode_json($results) . "\n";

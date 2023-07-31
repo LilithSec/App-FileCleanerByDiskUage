@@ -39,7 +39,9 @@ If there were no errors, it will exit zero.
 ```
 -d <du>        Target disk usage.
 
--p <path>      The path to operate on.
+-p <path>      The path to operate on. May be specified more than
+               once. Only the first path is used for disk usage
+			   checking though.
 
 -i <regex>     Optional ignore regex.
 
