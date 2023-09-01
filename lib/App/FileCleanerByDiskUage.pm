@@ -12,11 +12,11 @@ App::FileCleanerByDiskUage - Removes files based on disk space usage till it dro
 
 =head1 VERSION
 
-Version 0.2.0
+Version 0.2.1
 
 =cut
 
-our $VERSION = '0.2.0';
+our $VERSION = '0.2.1';
 
 =head1 SYNOPSIS
 
@@ -142,6 +142,8 @@ sub clean {
 	my @paths;
 
 	my $du_path;
+	# file paths should end with / or other wise if it is a symlink File::Find::Rule will skip it
+	# so fix that up while we are doing the path check
 	if ( !defined( $opts{path} ) ) {
 		die('$opts{path} is not defined');
 	} elsif ( ref( $opts{path} ) ne 'ARRAY' && !-d $opts{path} ) {
@@ -153,7 +155,7 @@ sub clean {
 		my $int = 0;
 		while ( defined( $opts{path}[$int] ) ) {
 			$opts{path}[$int] = $opts{path}[$int] . '/';
-			$opts{path}[$int] =~ s/\/+/\//;
+			$opts{path}[$int] =~ s/\/+$/\//;
 			if ( !-d $opts{path}[$int] ) {
 				push( @missing_paths, $opts{path}[$int] );
 			} else {
@@ -164,7 +166,7 @@ sub clean {
 		$du_path = $opts{path}[0];
 	} else {
 		$opts{path} = $opts{path} . '/';
-		$opts{path} =~ s/\/+/\//;
+		$opts{path} =~ s/\/+$/\//;
 		$du_path = $opts{path};
 		push( @paths, $opts{path} );
 	}
