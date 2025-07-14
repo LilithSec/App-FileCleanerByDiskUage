@@ -4,8 +4,8 @@ use 5.006;
 use strict;
 use warnings;
 use File::Find::Rule;
-use Filesys::Df;
-use Net::Server::Daemonize qw(create_pid_file unlink_pid_file check_pid_file);
+use Filesys::Df qw( df );
+use Net::Server::Daemonize qw(check_pid_file create_pid_file unlink_pid_file);
 
 =head1 NAME
 
