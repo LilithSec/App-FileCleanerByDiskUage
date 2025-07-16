@@ -35,3 +35,4 @@ inc/
 /*.zip
 
 bin/file_cleaner_by_du
+bin/*
