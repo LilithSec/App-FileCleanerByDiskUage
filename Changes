@@ -1,6 +1,6 @@
 Revision history for App-FileCleanerByDiskUage
 
-0.5.0   2026-07-06/?
+0.5.0   2026-07-06/14:15
         - reduce number of df calls via keeping track of amoung being removed and only checking every so often
         - use File::Find instead of File::Find::Rule
         - fix dry run
